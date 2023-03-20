@@ -1,6 +1,9 @@
 # Tarea 1 taller de integración
 
-Se utiliza este boiler plate (https://github.com/ixartz/Next-js-Boilerplate) para seguir buenas practicas de desarrollo.
+Se utiliza este boiler plate (<https://github.com/ixartz/Next-js-Boilerplate>) para seguir buenas practicas de desarrollo.
+
+md
+
 # Boilerplate and Starter for Next JS 13+, Tailwind CSS 3.2 and TypeScript [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/cloudposse.svg?style=social&label=Follow%20%40Ixartz)](https://twitter.com/ixartz)
 
 <p align="center">
@@ -60,8 +63,8 @@ Build your SaaS product faster with [React SaaS Boilerplate](https://nextlessjs.
 
 ### Premium Themes
 
-| [Green Nextjs Landing Page Template](https://creativedesignsguru.com/landing-green-modern-nextjs-theme/) | [Purple Saas Nextjs Theme](https://creativedesignsguru.com/landing-purple-modern-react-theme/) |
-| --- | --- |
+| [Green Nextjs Landing Page Template](https://creativedesignsguru.com/landing-green-modern-nextjs-theme/)                                                                                                   | [Purple Saas Nextjs Theme](https://creativedesignsguru.com/landing-purple-modern-react-theme/)                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [![Green Nextjs Landing Page Template](https://creativedesignsguru.com/assets/images/themes/landing-green-modern-nextjs-theme-xs.png)](https://creativedesignsguru.com/landing-green-modern-nextjs-theme/) | [![Blue Landing Page Nextjs Theme](https://creativedesignsguru.com/assets/images/themes/landing-blue-modern-nextjs-theme-xs.png)](https://creativedesignsguru.com/landing-blue-modern-react-theme/) |
 
 Find more [Nextjs Themes](https://creativedesignsguru.com/category/nextjs/).
@@ -86,7 +89,7 @@ Then, you can run locally in development mode with live reload:
 npm run dev
 ```
 
-Open http://localhost:3000 with your favorite browser to see your project.
+Open <http://localhost:3000> with your favorite browser to see your project.
 
 ```shell
 .
@@ -111,7 +114,7 @@ Open http://localhost:3000 with your favorite browser to see your project.
 
 You can easily configure Next js Boilerplate by making a search in the whole project with `FIXME:` for making quick customization. Here is some of the most important files to customize:
 
-- `public/apple-touch-icon.png`, `public/favicon.ico`, `public/favicon-16x16.png` and `public/favicon-32x32.png`: your website favicon, you can generate from https://favicon.io/favicon-converter/
+- `public/apple-touch-icon.png`, `public/favicon.ico`, `public/favicon-16x16.png` and `public/favicon-32x32.png`: your website favicon, you can generate from <https://favicon.io/favicon-converter/>
 - `src/styles/global.css`: your CSS file using Tailwind CSS
 - `src/utils/AppConfig.ts`: configuration file
 - `src/templates/Main.tsx`: default theme
@@ -134,8 +137,8 @@ One of the benefits of using Conventional Commits is that it allows us to automa
 You can see the results locally in production mode with:
 
 ```shell
-$ npm run build
-$ npm run start
+npm run build
+npm run start
 ```
 
 The generated HTML and CSS files are minified (built-in feature from Next js). It will also remove unused CSS from [Tailwind CSS](https://tailwindcss.com).
