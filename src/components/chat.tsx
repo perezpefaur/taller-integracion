@@ -1,5 +1,5 @@
 import WebSocketClient from "@/services/websocket";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 export interface ChatMessage {
   delivery_id: string;
@@ -15,7 +15,7 @@ interface ChatProps {
   setMessages: (messages: ChatMessage[]) => void;
 }
 
-const Chat = ({ wsClient, messages, setMessages }: ChatProps) => {
+const Chat = ({ wsClient, messages }: ChatProps) => {
   const [inputMessage, setInputMessage] = useState("");
 
   const handleSendMessage = () => {
