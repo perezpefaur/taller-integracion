@@ -1,0 +1,16 @@
+{
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/about": "pages/about.html",
+  "/blog": "pages/blog.html",
+  "/course/[id]": "pages/course/[id].html",
+  "/courses": "pages/courses.html",
+  "/": "pages/index.html",
+  "/ingredient/[id]": "pages/ingredient/[id].html",
+  "/ingredients": "pages/ingredients.html",
+  "/menu/[id]": "pages/menu/[id].html",
+  "/search": "pages/search.html",
+  "/blog/[slug]": "pages/blog/[slug].js",
+  "/_error": "pages/_error.js",
+  "/404": "pages/404.html"
+}

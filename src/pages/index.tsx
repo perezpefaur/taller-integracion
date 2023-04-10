@@ -1,9 +1,23 @@
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { Fragment, useEffect, useState } from 'react';
+import WebSocketClient, {
+  Delivery,
+  DeliveryPosition,
+  Destination,
+  Restaurant,
+  User,
+  WebSocketClientListener,
+} from "@/services/websocket";
+import { Menu, Transition } from "@headlessui/react";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Fragment, useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import { Meta } from '@/layouts/Meta';
-import { Main } from '@/templates/Main';
+import { Meta } from "@/layouts/Meta";
+import { Main } from "@/templates/Main";
+import Chat, { ChatMessage } from "../components/chat";
+
+import OrderForm from "@/components/orderForm";
+import dynamic from "next/dynamic";
 
 interface ICourseGeneral {
   id: string;
@@ -12,36 +26,136 @@ interface ICourseGeneral {
 }
 
 function formatCurrency(num: number): string {
-  const formattedNum = num.toLocaleString('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
+  const formattedNum = num.toLocaleString("es-CL", {
+    style: "currency",
+    currency: "CLP",
   });
-  return formattedNum.replace(/\s/g, ''); // Remove spaces between currency symbol and value
+  return formattedNum.replace(/\s/g, ""); // Remove spaces between currency symbol and value
 }
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
+const DynamicMap = dynamic(() => import("../components/map"), { ssr: false });
+
 const Index = () => {
+  // TAREA 2
+  const [client, setClient] = useState<WebSocketClient | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [connected, setConnected] = useState(false);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [deliveriesPositions, setDeliveriesPositions] = useState<
+    DeliveryPosition[]
+  >([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const isBrowser = typeof window !== "undefined";
+
+  const listener: WebSocketClientListener = {
+    onUsersUpdate: (users) => {
+      setUsers(users);
+    },
+    onRestaurantsUpdate: (restaurants) => {
+      setRestaurants(restaurants);
+    },
+    onDestinationsUpdate: (newDestinations) => {
+      setDestinations(newDestinations);
+    },
+    onDeliveriesUpdate: (newDeliveries) => {
+      setDeliveries(newDeliveries);
+    },
+    onPositionUpdate(delivery_position) {
+      setDeliveriesPositions((prev) => {
+        const index = prev.findIndex(
+          (deliveryPosition) =>
+            deliveryPosition.delivery_id === delivery_position.delivery_id
+        );
+        if (index === -1) {
+          return [...prev, delivery_position];
+        } else {
+          prev[index] = delivery_position;
+          return [...prev];
+        }
+      });
+    },
+    onChatMessage(chatMessage) {
+      //only show last 10 messages
+      setMessages((prev) => {
+        if (prev.length >= 10) {
+          prev.shift();
+        }
+        return [...prev, chatMessage];
+      });
+    },
+    onDeliveryStatusUpdate(deliveryStatus) {
+      const { delivery_id, status } = deliveryStatus;
+      let message = "";
+
+      switch (status) {
+        case "PREPARING_ORDER":
+          message = `El pedido ${delivery_id} está siendo preparado.`;
+          break;
+        case "PICKING_UP":
+          message = `El repartidor está recogiendo el pedido ${delivery_id}.`;
+          break;
+        case "ORDER_READY":
+          message = `El pedido ${delivery_id} está listo para ser recogido.`;
+          break;
+        case "ON_THE_WAY":
+          message = `El pedido ${delivery_id} está en camino.`;
+          break;
+        case "ARRIVED_TO_DESTINATION":
+          message = `El pedido ${delivery_id} ha llegado a su destino.`;
+          break;
+        case "DELIVERED":
+          message = `El pedido ${delivery_id} ha sido entregado.`;
+          break;
+        default:
+          message = `El pedido ${delivery_id} tiene un estado desconocido.`;
+      }
+
+      toast.info(message);
+    },
+  };
+
+  useEffect(() => {
+    const wsClient = isBrowser ? new WebSocketClient() : null;
+    if (wsClient) {
+      wsClient.connect("perezpefaur@uc.cl", "18638953");
+      wsClient.addListener(listener);
+      setClient(wsClient);
+      setConnected(true);
+      // Desconectar al desmontar el componente
+      return () => {
+        wsClient.disconnect();
+        wsClient.removeListener(listener);
+      };
+    }
+  }, []);
+
+  // TAREA 1
+
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
   const [menus, setMenus] = useState([]);
-  const [order, setOrder] = useState('asc');
-  const [sortBy, setSortBy] = useState('name');
+  const [order, setOrder] = useState("asc");
+  const [sortBy, setSortBy] = useState("name");
   const [sortOptions, setSortOptions] = useState([
-    { name: 'Nombre: A-Z', sortBy: 'name', order: 'asc', current: true },
-    { name: 'Nombre: Z-A', sortBy: 'name', order: 'desc', current: false },
+    { name: "Nombre: A-Z", sortBy: "name", order: "asc", current: true },
+    { name: "Nombre: Z-A", sortBy: "name", order: "desc", current: false },
     {
-      name: 'Precio: Menor a Mayor',
-      sortBy: 'price',
-      order: 'asc',
+      name: "Precio: Menor a Mayor",
+      sortBy: "price",
+      order: "asc",
       current: false,
     },
     {
-      name: 'Precio: Mayor a Menor',
-      sortBy: 'price',
-      order: 'desc',
+      name: "Precio: Mayor a Menor",
+      sortBy: "price",
+      order: "desc",
       current: false,
     },
   ]);
@@ -51,7 +165,7 @@ const Index = () => {
       `https://tarea-1.2023-1.tallerdeintegracion.cl/trays?sort=${sortBy}&order=${order}&page=${page}&size=10`,
       {
         headers: {
-          accept: 'application/json',
+          accept: "application/json",
         },
       }
     )
@@ -63,6 +177,8 @@ const Index = () => {
       .catch((error) => console.error(error));
   }, [page, sortBy, order]);
 
+  // Return
+
   return (
     <Main
       meta={
@@ -72,6 +188,29 @@ const Index = () => {
         />
       }
     >
+      <ToastContainer />
+      <DynamicMap
+        restaurants={restaurants}
+        destinations={destinations}
+        deliveries={deliveries}
+        deliveryPositions={deliveriesPositions}
+        users={users}
+      />
+      {client ? (
+        <>
+          <Chat
+            wsClient={client}
+            messages={messages}
+            setMessages={setMessages}
+          />
+          <OrderForm
+            wsClient={client}
+            restaurants={restaurants}
+            destinations={destinations}
+            products={menus}
+          />
+        </>
+      ) : null}
       <div>
         {/* Hero section */}
         <div className="relative isolate -z-10 overflow-hidden bg-gradient-to-b from-indigo-100/20 pt-14">
@@ -79,28 +218,6 @@ const Index = () => {
             className="absolute inset-y-0 right-1/2 -z-10 -mr-96 w-[200%] origin-top-right skew-x-[-30deg] bg-white shadow-xl shadow-indigo-600/10 ring-1 ring-indigo-50 sm:-mr-80 lg:-mr-96"
             aria-hidden="true"
           />
-          <div className="mx-auto max-w-7xl px-6 py-32 sm:py-40 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:grid lg:max-w-none lg:grid-cols-2 lg:gap-x-16 lg:gap-y-6 xl:grid-cols-1 xl:grid-rows-1 xl:gap-x-8">
-              <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:col-span-2 xl:col-auto">
-                ¡Ey, ey, ey! Hoy vengo a presentaros un sitio muy especial, se
-                trata de mi nuevo lugar de tapas.
-              </h1>
-              <div className="mt-6 max-w-xl lg:mt-0 xl:col-end-1 xl:row-start-1">
-                <p className="text-lg leading-8 text-gray-600">
-                  En Donde Ibai podréis encontrar platos deliciosos y
-                  sorprendentes, creados con los mejores ingredientes y
-                  elaborados por nuestros expertos chefs. Además, nuestro equipo
-                  de camareros estará siempre a vuestra disposición para hacer
-                  de vuestra experiencia en el restaurante algo único.
-                </p>
-              </div>
-              <img
-                src="https://media.revistagq.com/photos/5eb277d25329b7e078a94336/3:2/w_4026,h_2684,c_limit/GettyImages-1030963330.jpg"
-                alt=""
-                className="mt-10 aspect-[6/5] w-full max-w-lg rounded-2xl object-cover sm:mt-16 lg:mt-0 lg:max-w-none xl:row-span-2 xl:row-end-2 xl:mt-36"
-              />
-            </div>
-          </div>
           <div className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-white sm:h-32" />
         </div>
 
@@ -151,10 +268,10 @@ const Index = () => {
                           }}
                           className={classNames(
                             option.current
-                              ? 'font-medium text-gray-900'
-                              : 'text-gray-500',
-                            active ? 'bg-gray-100' : '',
-                            'block px-4 py-2 text-sm'
+                              ? "font-medium text-gray-900"
+                              : "text-gray-500",
+                            active ? "bg-gray-100" : "",
+                            "block px-4 py-2 text-sm"
                           )}
                         >
                           {option.name}
@@ -283,10 +400,10 @@ const Index = () => {
                 >
                   <div className="hidden sm:block">
                     <p className="text-sm text-gray-700">
-                      Mostrando{' '}
-                      <span className="font-medium">{(page - 1) * 10 + 1}</span>{' '}
-                      a <span className="font-medium">{page * 10}</span> de{' '}
-                      <span className="font-medium">{maxPages * 10}</span>{' '}
+                      Mostrando{" "}
+                      <span className="font-medium">{(page - 1) * 10 + 1}</span>{" "}
+                      a <span className="font-medium">{page * 10}</span> de{" "}
+                      <span className="font-medium">{maxPages * 10}</span>{" "}
                       resultados
                     </p>
                   </div>
