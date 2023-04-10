@@ -43,7 +43,6 @@ const Index = () => {
   // TAREA 2
   const [client, setClient] = useState<WebSocketClient | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  const [connected, setConnected] = useState(false);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -127,13 +126,13 @@ const Index = () => {
       wsClient.connect("perezpefaur@uc.cl", "18638953");
       wsClient.addListener(listener);
       setClient(wsClient);
-      setConnected(true);
       // Desconectar al desmontar el componente
       return () => {
         wsClient.disconnect();
         wsClient.removeListener(listener);
       };
     }
+    return () => {};
   }, []);
 
   // TAREA 1
