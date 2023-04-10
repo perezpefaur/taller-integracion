@@ -123,7 +123,7 @@ const Map = ({
             </Popup>
           </Marker>
         ))}
-        {deliveries.map((delivery, index) => {
+        {deliveries.map((delivery) => {
           const destination = findDestinationById(delivery.destination_id);
           const restaurant = findRestaurantById(delivery.restaurant_id);
           if (!destination || !restaurant) return null;
